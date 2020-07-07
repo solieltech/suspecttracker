@@ -25,10 +25,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ExcelHelper {
-
-
-
-
     protected void write2Cell(XSSFSheet spreadsheet,VideoCommentsVO videoCommentsVO,int rowid){
         XSSFRow row = spreadsheet.createRow(rowid++);
         row.createCell(0).setCellValue(Objects.toString(videoCommentsVO.getName(),""));
@@ -47,9 +43,10 @@ public class ExcelHelper {
     }
 
     public ResponseEntity<InputStreamResource> writeToExcel(List<VideoCommentsVO> videoCommentsVOList) throws Exception {
-
+        //Create blank workbook
         XSSFWorkbook workbook = new XSSFWorkbook();
 
+        //Create a blank sheet
         XSSFSheet spreadsheet = workbook.createSheet(" Comments ");
         int rowid = 0;
         XSSFRow row = spreadsheet.createRow(rowid++);
@@ -60,7 +57,26 @@ public class ExcelHelper {
         row.createCell(4).setCellValue("Pubblished At");
 
         for (VideoCommentsVO videoCommentsVO : videoCommentsVOList) {
-            write2Cell(spreadsheet,videoCommentsVO,rowid);
+           // write2Cell(spreadsheet,videoCommentsVO,rowid);
+          row = spreadsheet.createRow(rowid++);
+            row.createCell(0).setCellValue(Objects.toString(videoCommentsVO.getName(), ""));
+            row.createCell(1).setCellValue(Objects.toString(videoCommentsVO.getComment(), ""));
+            row.createCell(2).setCellValue(Objects.toString(videoCommentsVO.getLikeCount(), ""));
+            row.createCell(3).setCellValue(Objects.toString(videoCommentsVO.getTotalReplyCount(), ""));
+            row.createCell(4).setCellValue(Objects.toString(videoCommentsVO.getPublishedAt(), ""));
+
+            if (videoCommentsVO.getVideoCommentsVOList() != null && videoCommentsVO.getVideoCommentsVOList().size() > 0) {
+                List<VideoCommentsVO> childvideoCommentsVOList = videoCommentsVO.getVideoCommentsVOList();
+                for (VideoCommentsVO childComment : childvideoCommentsVOList) {
+                     row = spreadsheet.createRow(rowid++);
+                    row.createCell(0).setCellValue(Objects.toString(childComment.getName(), ""));
+                    row.createCell(1).setCellValue(Objects.toString(childComment.getComment(), ""));
+                    row.createCell(2).setCellValue(Objects.toString(childComment.getLikeCount(), ""));
+                    row.createCell(3).setCellValue(Objects.toString(childComment.getTotalReplyCount(), ""));
+                    row.createCell(4).setCellValue(Objects.toString(childComment.getPublishedAt(), ""));
+
+                }
+            }
         }
         //Write the workbook in file system
         File f = new File("comments.xlsx");
@@ -88,5 +104,4 @@ public class ExcelHelper {
                 .headers(httpHeaders)
                 .body(new InputStreamResource(new ByteArrayInputStream(stream.toByteArray())));
     }
-
 }
