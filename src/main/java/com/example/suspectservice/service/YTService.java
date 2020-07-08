@@ -6,6 +6,10 @@ import com.example.suspectservice.model.VideoComments;
 import com.example.suspectservice.rest.client.YTClient;
 import com.example.suspectservice.service.uri.service.VideoCommentService;
 import com.example.suspectservice.vo.VideoCommentsVO;
+import com.example.suspectservice.vo.VideoStatistics;
+import com.google.api.client.json.GenericJson;
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -26,6 +30,15 @@ public class YTService {
     private ExcelHelper excelHelper;
     @Autowired
     private VideoCommentService videoCommentService;
+
+
+    public String videoStatistics(String id){
+        String part="statistics";
+        GenericJson genericJson = (GenericJson)ytClient.get("videos", GenericJson.class,new String[]{part,id});
+       // VideoStatistics videoStatistics = new Gson().newBuilder().addSerializationExclusionStrategy(new ExclusionStrategy().shouldSkipField(new FieldAttributes.))fromJson(jsonRes, VideoStatistics.class);
+       // System.out.println(videoStatistics);
+        return new Gson().toJson(genericJson);
+    }
 
     public String channelStatistics(String id){
         String part="statistics";
@@ -89,4 +102,15 @@ class ApiCall implements Callable<VideoComments>{
         return videoComments;
 
     }
+}
+class CustomExclusionStrategy implements ExclusionStrategy {
+
+    public boolean shouldSkipField(FieldAttributes f) {
+        return (f.getDeclaringClass() == VideoStatistics.class && f.getName().equals("cost"));
+    }
+
+    public boolean shouldSkipClass(Class<?> clazz) {
+        return false;
+    }
+
 }
