@@ -28,7 +28,7 @@ public class ExcelHelper {
 
 
 
-    protected void write2Cell(XSSFSheet spreadsheet,VideoCommentsVO videoCommentsVO,int rowid){
+    /*protected void write2Cell(XSSFSheet spreadsheet,VideoCommentsVO videoCommentsVO,int rowid){
         XSSFRow row = spreadsheet.createRow(rowid++);
         row.createCell(0).setCellValue(Objects.toString(videoCommentsVO.getName(),""));
         row.createCell(1).setCellValue(Objects.toString(videoCommentsVO.getComment(),""));
@@ -43,7 +43,7 @@ public class ExcelHelper {
             }
         }
 
-    }
+    }*/
 
     public ResponseEntity<InputStreamResource> writeToExcel(List<VideoCommentsVO> videoCommentsVOList) throws Exception {
         //Create blank workbook
