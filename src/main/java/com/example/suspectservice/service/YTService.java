@@ -40,7 +40,7 @@ public class YTService {
         String part="statistics";
         ChannelStatistics channelStatistics = (ChannelStatistics)ytClient.get("channels", ChannelStatistics.class,new String[]{part,id});
         saveChannelStats(channelStatistics, id);
-        return new Gson().toJson(channelStatsRepository.findAll());
+        return new Gson().toJson(channelStatsRepository.findAllByChannelId(id));
     }
     public ResponseEntity<InputStreamResource> videoComments(String id){
         String part="snippet";
