@@ -45,14 +45,15 @@ public class VideoCommentService {
             if(videoCommentVO.getTotalReplyCount()>0){
                 List<VideoCommentsVO> subComments= getChildComents(videoCommentVO.getParentCommentId());
                 totalComments+=subComments.size();
-                videoCommentVO.setVideoCommentsVOList(subComments);
+                //videoCommentVO.setVideoCommentsVOList(subComments);
+                voList.addAll(subComments);
             }
         }
         totalComments+=voList.size();
         }catch(Exception ex) {
         	ex.printStackTrace();
         }
-        System.out.println("Total Comments including sub comments " + totalComments);
+        //System.out.println("Total Comments including sub comments " + totalComments);
         return voList;
     }
     protected List<VideoCommentsVO> getChildComents(String parentCommentId){

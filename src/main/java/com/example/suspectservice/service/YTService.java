@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 @Service
 public class YTService {
@@ -74,6 +75,15 @@ public class YTService {
         }catch(Exception ex) {
         	ex.printStackTrace();
         }
+        
+       // List<VideoCommentsVO> flat = voList.stream().flatMap(List::stream).collect(Collectors.toList());
+        
+		/*
+		 * List<VideoCommentsVO> flat = voList.stream().map(x->{
+		 * if(x.getVideoCommentsVOList().size()>0) { return x.getVideoCommentsVOList();
+		 * } return null; }).flatMap(x->x.stream()).collect(Collectors.toList());
+		 */
+        
         return new Gson().toJson(voList);
         /*try {
            return excelHelper.writeToExcel(voList);
