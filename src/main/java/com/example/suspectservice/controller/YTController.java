@@ -30,13 +30,7 @@ public class YTController {
     }
     @GetMapping(value = "/getVideoComments/{videoId}")
     public @ResponseBody
-    ResponseEntity<InputStreamResource> getVideoComments(@PathVariable String videoId) {
-        /*HttpHeaders httpHeaders =new HttpHeaders();
-        httpHeaders.set("Content-Disposition",
-                "attachment; filename=new-excel-file.xls");
-        httpHeaders.setContentType(new MediaType("application/octet-stream"));
-        new ResponseEntity().set
-        logger.info("get video comments ::: >>>> ");*/
+    String getVideoComments(@PathVariable String videoId) {
         return ytService.videoComments(videoId);
     }
 

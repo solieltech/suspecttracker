@@ -2,6 +2,8 @@ package com.example.suspectservice.service.uri.service;
 
 import com.example.suspectservice.model.*;
 import com.example.suspectservice.rest.client.YTClient;
+import com.example.suspectservice.task.ChildCommentTask;
+import com.example.suspectservice.task.ProcessCommentTask;
 import com.example.suspectservice.vo.VideoCommentsVO;
 import com.example.suspectservice.yt.core.YTCore;
 import com.google.api.services.youtube.YouTube;
@@ -14,6 +16,9 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @Service
 public class VideoCommentService {
@@ -26,28 +31,27 @@ public class VideoCommentService {
     }
     protected List<VideoCommentsVO> convertToVO(VideoComments videoComments, List<VideoCommentsVO> voList,int totalComments){
         List<CommentItems> list = videoComments.getItems();
-
+        ExecutorService executor = Executors.newFixedThreadPool(30);
+        try {
         for(CommentItems commentItem:list){
-            VideoCommentsVO videoCommentsVO =new VideoCommentsVO();
-            totalComments++;
-            CommentSnippet commentSnippet = commentItem.getSnippet();
-            videoCommentsVO.setTotalReplyCount(commentSnippet.getTotalReplyCount());
-            TopLevelComment topLevelComment = commentSnippet.getTopLevelComment();
-            CommentDetailsSnippet commentDetailsSnippet = topLevelComment.getSnippet();
-            videoCommentsVO.setName(commentDetailsSnippet.getAuthorDisplayName());
-            videoCommentsVO.setLikeCount(commentDetailsSnippet.getLikeCount());
-            videoCommentsVO.setPublishedAt(commentDetailsSnippet.getPublishedAt());
-            videoCommentsVO.setUpdatedAt(commentDetailsSnippet.getUpdatedAt());
-            videoCommentsVO.setComment(commentDetailsSnippet.getTextDisplay());
-            String parentCommentId = topLevelComment.getId();
-            voList.add(videoCommentsVO);
-            if(commentSnippet.getTotalReplyCount()>0){
-                List<VideoCommentsVO> subComments= getChildComents(parentCommentId);
+        	ProcessCommentTask processCommentTask = new ProcessCommentTask();
+        	processCommentTask.setCommentItem(commentItem);
+         Future<VideoCommentsVO> processCommentFuture = executor.submit(processCommentTask);
+            
+         VideoCommentsVO videoCommentVO = processCommentFuture.get();
+         voList.add(videoCommentVO);
+         
+         
+            if(videoCommentVO.getTotalReplyCount()>0){
+                List<VideoCommentsVO> subComments= getChildComents(videoCommentVO.getParentCommentId());
                 totalComments+=subComments.size();
-                videoCommentsVO.setVideoCommentsVOList(subComments);
+                videoCommentVO.setVideoCommentsVOList(subComments);
             }
         }
         totalComments+=voList.size();
+        }catch(Exception ex) {
+        	ex.printStackTrace();
+        }
         System.out.println("Total Comments including sub comments " + totalComments);
         return voList;
     }
@@ -72,15 +76,20 @@ public class VideoCommentService {
     protected  List<VideoCommentsVO> convertToVO(ChildComments commentList){
        List<ChildCommentItems> items =  commentList.getItems();
         List<VideoCommentsVO> list = new LinkedList<>();
+        ExecutorService executor = Executors.newFixedThreadPool(30);
+        
+        
+        try {
         for(ChildCommentItems comment : items){
-            CommentDetailsSnippet commentDetailsSnippet = comment.getSnippet();
-            VideoCommentsVO videoCommentsVO =new VideoCommentsVO();
-            videoCommentsVO.setName(commentDetailsSnippet.getAuthorDisplayName());
-            videoCommentsVO.setLikeCount(commentDetailsSnippet.getLikeCount());
-            videoCommentsVO.setPublishedAt(commentDetailsSnippet.getPublishedAt());
-            videoCommentsVO.setUpdatedAt(commentDetailsSnippet.getUpdatedAt());
-            videoCommentsVO.setComment(commentDetailsSnippet.getTextDisplay());
-            list.add(videoCommentsVO);
+        	
+        	ChildCommentTask childCommentTask = new ChildCommentTask();
+        	childCommentTask.setChildComment(comment);
+        	
+        	Future<VideoCommentsVO> videoCommentVO = executor.submit(childCommentTask);
+            list.add(videoCommentVO.get());
+        }
+        }catch(Exception ex) {
+        	ex.printStackTrace();
         }
         return list;
     }

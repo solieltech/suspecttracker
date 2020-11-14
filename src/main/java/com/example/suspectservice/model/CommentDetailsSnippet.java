@@ -24,8 +24,18 @@ public class CommentDetailsSnippet   {
   private String publishedAt = null;
 
   private String updatedAt = null;
+  
+  private String authorChannelUrl = null;
 
-  public CommentDetailsSnippet textDisplay(String textDisplay) {
+  public String getAuthorChannelUrl() {
+	return authorChannelUrl;
+}
+
+public void setAuthorChannelUrl(String authorChannelUrl) {
+	this.authorChannelUrl = authorChannelUrl;
+}
+
+public CommentDetailsSnippet textDisplay(String textDisplay) {
     this.textDisplay = textDisplay;
     return this;
   }

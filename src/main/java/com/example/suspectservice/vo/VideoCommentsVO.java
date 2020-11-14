@@ -14,5 +14,8 @@ public class VideoCommentsVO {
     private String publishedAt;
     private String updatedAt;
     private List<VideoCommentsVO> videoCommentsVOList;
+    private String parentCommentId;
+    private Integer replyCount;
+    private String authorChannelUrl;
 
 }

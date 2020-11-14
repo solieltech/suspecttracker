@@ -20,8 +20,12 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @Service
 public class YTService {
@@ -42,23 +46,41 @@ public class YTService {
         saveChannelStats(channelStatistics, id);
         return new Gson().toJson(channelStatsRepository.findAllByChannelId(id));
     }
-    public ResponseEntity<InputStreamResource> videoComments(String id){
+    public String videoComments(String id){
         String part="snippet";
         String nextPageToken =null;
         int totalComments=0;
         List<VideoCommentsVO> voList =new LinkedList<>();
-        do{
-            VideoComments videoComments = (VideoComments)ytClient.getVideoComments("commentThreads", VideoComments.class,new String[]{part,id,nextPageToken});
-            nextPageToken =  videoComments.getNextPageToken();
-            videoCommentService.processYTModel(videoComments,voList,totalComments);
-        }while (nextPageToken!=null && !nextPageToken.equals(""));
-        System.out.println("Total Comments:: " +totalComments);
+        
+        
+      //Executor service instance
+        ExecutorService executor = Executors.newFixedThreadPool(50);
         try {
+        
+        do{
+        	CommentsTask commentTask = new CommentsTask();
+        	commentTask.setId(id);
+        	commentTask.setPart(part);
+        	commentTask.setNextPageToken(nextPageToken);
+        	commentTask.setYtClient(ytClient);
+        	
+        	Future<VideoComments >videoCommentsFuture = executor.submit(commentTask);
+        	VideoComments videoCommentsNew = videoCommentsFuture.get();
+            //VideoComments videoComments = (VideoComments)ytClient.getVideoComments("commentThreads", VideoComments.class,new String[]{part,id,nextPageToken});
+            nextPageToken =  videoCommentsNew.getNextPageToken();
+            videoCommentService.processYTModel(videoCommentsNew,voList,totalComments);
+        }while (nextPageToken!=null && !nextPageToken.equals(""));
+        System.out.println("Total Comments:: " +voList.size());
+        }catch(Exception ex) {
+        	ex.printStackTrace();
+        }
+        return new Gson().toJson(voList);
+        /*try {
            return excelHelper.writeToExcel(voList);
         }catch(Exception ex){
             ex.printStackTrace();
             return null;
-        }
+        }*/
     }
     public void saveChannelStats(ChannelStatistics channelStatistics,String id) {
     	ChannelStatsEntity channelStats = new ChannelStatsEntity();
@@ -66,7 +88,10 @@ public class YTService {
     	channelStats.setSubscriberCount(channelStatistics.getItems().get(0).getStatistics().getSubscriberCount());
     	channelStats.setVideoCount(channelStatistics.getItems().get(0).getStatistics().getVideoCount());
     	channelStats.setViewCount(channelStatistics.getItems().get(0).getStatistics().getViewCount());
-    	channelStats.setTimestamp(java.time.LocalDateTime.now());
+    	Date date = new Date(); 
+		SimpleDateFormat formatter = new SimpleDateFormat("dd-M-yyyy hh:mm:ss");  
+	    String strDate = formatter.format(date); 
+    	channelStats.setTimestamp(LocalDateTime.now());
     	channelStatsRepository.save(channelStats);
     }
 }
