@@ -39,6 +39,7 @@ public class VideoCommentService {
          Future<VideoCommentsVO> processCommentFuture = executor.submit(processCommentTask);
             
          VideoCommentsVO videoCommentVO = processCommentFuture.get();
+         System.out.println("Comment ::::"+videoCommentVO.getComment());
          voList.add(videoCommentVO);
          
          

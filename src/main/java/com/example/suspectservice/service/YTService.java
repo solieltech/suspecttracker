@@ -1,32 +1,28 @@
 package com.example.suspectservice.service;
 
-import com.example.suspectservice.ExcelHelper;
-import com.example.suspectservice.entity.ChannelStatsEntity;
-import com.example.suspectservice.entity.UserInfo;
-import com.example.suspectservice.model.ChannelStatistics;
-import com.example.suspectservice.model.VideoComments;
-import com.example.suspectservice.repository.ChannelStatsRepository;
-import com.example.suspectservice.repository.UserInfoRepository;
-import com.example.suspectservice.rest.client.YTClient;
-import com.example.suspectservice.service.uri.service.VideoCommentService;
-import com.example.suspectservice.vo.VideoCommentsVO;
-import com.google.gson.Gson;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
+
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.example.suspectservice.ExcelHelper;
+import com.example.suspectservice.entity.ChannelStatsEntity;
+import com.example.suspectservice.model.ChannelStatistics;
+import com.example.suspectservice.model.VideoComments;
+import com.example.suspectservice.repository.ChannelStatsRepository;
+import com.example.suspectservice.rest.client.YTClient;
+import com.example.suspectservice.service.uri.service.VideoCommentService;
+import com.example.suspectservice.vo.VideoCommentsVO;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 @Service
 public class YTService {
@@ -83,8 +79,15 @@ public class YTService {
 		 * if(x.getVideoCommentsVOList().size()>0) { return x.getVideoCommentsVOList();
 		 * } return null; }).flatMap(x->x.stream()).collect(Collectors.toList());
 		 */
+        Gson gson = new GsonBuilder().setLenient().disableHtmlEscaping().create();
         
-        return new Gson().toJson(voList);
+        JSONObject jsonObject = new JSONObject();
+        String jsonData = gson.toJson(voList);
+        System.out.println(jsonData);
+        
+        return jsonData;
+       // return voList;
+        
         /*try {
            return excelHelper.writeToExcel(voList);
         }catch(Exception ex){
@@ -101,7 +104,7 @@ public class YTService {
     	Date date = new Date(); 
 		SimpleDateFormat formatter = new SimpleDateFormat("dd-M-yyyy hh:mm:ss");  
 	    String strDate = formatter.format(date); 
-    	channelStats.setTimestamp(LocalDateTime.now());
+    	channelStats.setTimestamp(strDate);
     	channelStatsRepository.save(channelStats);
     }
 }

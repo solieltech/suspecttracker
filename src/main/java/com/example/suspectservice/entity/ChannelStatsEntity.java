@@ -24,5 +24,5 @@ public class ChannelStatsEntity {
 	private String viewCount;
 	private String subscriberCount;
 	private String videoCount;
-	private LocalDateTime timestamp;
+	private String timestamp;
 }

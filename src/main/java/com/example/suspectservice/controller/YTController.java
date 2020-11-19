@@ -1,16 +1,19 @@
 package com.example.suspectservice.controller;
 
-import com.example.suspectservice.service.YTService;
+import javax.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.suspectservice.service.YTService;
 
 @RestController
 @ComponentScan("com.example.suspectservice")
@@ -19,9 +22,6 @@ public class YTController {
 
     @Autowired
     private YTService ytService;
-
-    private static final String FILE_PATH = "E:\\Kiran_work\\Suspect-Tracker\\suspect-service\\suspect-service\\comments.xlsx";
-
     @GetMapping(value = "/getChannelStats/{channelId}")
     public @ResponseBody
     String getChannelStats(@PathVariable String channelId) {
@@ -30,9 +30,15 @@ public class YTController {
     }
     @GetMapping(value = "/getVideoComments/{videoId}")
     public @ResponseBody
-    String getVideoComments(@PathVariable String videoId) {
-        return ytService.videoComments(videoId);
+    ResponseEntity<String>  getVideoComments(@PathVariable String videoId,HttpServletResponse res) {
+    	 HttpHeaders responseHeaders = new HttpHeaders();
+         responseHeaders.set("content-type", 
+           "application/json; charset=utf-8");
+      
+         return ResponseEntity.ok()
+           .headers(responseHeaders)
+           .body(ytService.videoComments(videoId));
+    	
     }
-
 
 }
