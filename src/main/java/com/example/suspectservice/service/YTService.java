@@ -16,10 +16,12 @@ import org.springframework.stereotype.Service;
 import com.example.suspectservice.ExcelHelper;
 import com.example.suspectservice.entity.ChannelStatsEntity;
 import com.example.suspectservice.model.ChannelStatistics;
+import com.example.suspectservice.model.Snippet;
 import com.example.suspectservice.model.VideoComments;
 import com.example.suspectservice.repository.ChannelStatsRepository;
 import com.example.suspectservice.rest.client.YTClient;
 import com.example.suspectservice.service.uri.service.VideoCommentService;
+import com.example.suspectservice.vo.ChannelDetailsVO;
 import com.example.suspectservice.vo.VideoCommentsVO;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -42,6 +44,11 @@ public class YTService {
         ChannelStatistics channelStatistics = (ChannelStatistics)ytClient.get("channels", ChannelStatistics.class,new String[]{part,id});
         saveChannelStats(channelStatistics, id);
         return new Gson().toJson(channelStatsRepository.findAllByChannelId(id));
+    }
+    public String channelDetails(String id) {
+    	String part="snippet";
+        ChannelStatistics channelStatistics = (ChannelStatistics)ytClient.get("channels", ChannelStatistics.class,new String[]{part,id});
+        return new Gson().toJson(convertChannelDetails(channelStatistics));
     }
     public String videoComments(String id){
         String part="snippet";
@@ -106,5 +113,13 @@ public class YTService {
 	    String strDate = formatter.format(date); 
     	channelStats.setTimestamp(strDate);
     	channelStatsRepository.save(channelStats);
+    }
+    public ChannelDetailsVO convertChannelDetails(ChannelStatistics stats) {
+    	ChannelDetailsVO channelDetailsVO = new ChannelDetailsVO();
+    	Snippet snipet = stats.getItems().get(0).getSnippet();
+    	channelDetailsVO.setTitle(snipet.getTitle());
+    	channelDetailsVO.setDescription(snipet.getDescription());
+    	channelDetailsVO.setPublishedAt(snipet.getPublishedAt());
+    	return channelDetailsVO;
     }
 }

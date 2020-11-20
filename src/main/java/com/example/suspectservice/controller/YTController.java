@@ -28,6 +28,12 @@ public class YTController {
         logger.info("getChannelStats ::: >>>> ");
         return ytService.channelStatistics(channelId).toString();
     }
+    @GetMapping(value = "/channelDetails/{channelId}")
+    public @ResponseBody
+    String getChanelDeatails(@PathVariable String channelId) {
+        logger.info("channel details ::: >>>> ");
+        return ytService.channelDetails(channelId).toString();
+    }
     @GetMapping(value = "/getVideoComments/{videoId}")
     public @ResponseBody
     ResponseEntity<String>  getVideoComments(@PathVariable String videoId,HttpServletResponse res) {
